@@ -282,7 +282,7 @@ namespace WalkingTec.Mvvm.Mvc
                         }
                     }
                 }
-                catch {}
+                catch { }
             }
             //try to set values to the viewmodel's matching properties
             if (values != null)
@@ -301,7 +301,7 @@ namespace WalkingTec.Mvvm.Mvc
             if (rv is IBaseBatchVM<BaseVM> temp)
             {
                 temp.Ids = new string[] { };
-                if(Ids != null)
+                if (Ids != null)
                 {
                     var tempids = new List<string>();
                     foreach (var iid in Ids)
@@ -427,7 +427,7 @@ namespace WalkingTec.Mvvm.Mvc
         /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
         /// <param name="passInit">if true, the viewmodel will not call InitVM internally</param>
         /// <returns>ViewModel</returns>
-        public T CreateVM<T>( Guid[] Ids, Expression<Func<T, object>> values = null, bool passInit = false) where T : BaseVM
+        public T CreateVM<T>(Guid[] Ids, Expression<Func<T, object>> values = null, bool passInit = false) where T : BaseVM
         {
             SetValuesParser p = new SetValuesParser();
             var dir = p.Parse(values);
@@ -496,7 +496,8 @@ namespace WalkingTec.Mvvm.Mvc
         public virtual IDataContext CreateDC(bool isLog = false)
         {
             string cs = CurrentCS;
-            if (isLog == true)
+
+            if (isLog == true && false)
             {
                 if (ConfigInfo.ConnectionStrings?.Where(x => x.Key.ToLower() == "defaultlog").FirstOrDefault() != null)
                 {
@@ -507,7 +508,7 @@ namespace WalkingTec.Mvvm.Mvc
                     cs = "default";
                 }
             }
-            return (IDataContext)GlobaInfo?.DataContextCI?.Invoke(new object[] { ConfigInfo?.ConnectionStrings?.Where(x => x.Key.ToLower() == cs).Select(x => x.Value).FirstOrDefault(), CurrentDbType ?? ConfigInfo.DbType });
+            return (IDataContext)GlobaInfo?.DataContextCI?.Invoke(new object[] { ConfigInfo?.ConnectionStrings?.Where(x => x.Key.ToLower() == cs).Select(x => x.Value).FirstOrDefault() ?? cs, CurrentDbType ?? ConfigInfo.DbType });
         }
 
         #endregion
@@ -536,16 +537,16 @@ namespace WalkingTec.Mvvm.Mvc
 
         #region Validate model
         [NonAction]
-        public Dictionary<string,string> RedoValidation(object item)
+        public Dictionary<string, string> RedoValidation(object item)
         {
             Dictionary<string, string> rv = new Dictionary<string, string>();
             TryValidateModel(item);
 
             foreach (var e in ControllerContext.ModelState)
             {
-                if(e.Value.ValidationState == ModelValidationState.Invalid)
+                if (e.Value.ValidationState == ModelValidationState.Invalid)
                 {
-                    rv.Add(e.Key, e.Value.Errors.Select(x=>x.ErrorMessage).ToSpratedString());
+                    rv.Add(e.Key, e.Value.Errors.Select(x => x.ErrorMessage).ToSpratedString());
                 }
             }
 
@@ -579,7 +580,7 @@ namespace WalkingTec.Mvvm.Mvc
         }
         #endregion
 
-        protected T ReadFromCache<T>(string key, Func<T> setFunc,int? timeout = null)
+        protected T ReadFromCache<T>(string key, Func<T> setFunc, int? timeout = null)
         {
             if (Cache.TryGetValue(key, out T rv) == false)
             {
@@ -638,7 +639,7 @@ namespace WalkingTec.Mvvm.Mvc
             {
                 rv.Controller.Response.Headers.Add("IsScript", "true");
             }
-            catch{}
+            catch { }
             return rv;
         }
 
