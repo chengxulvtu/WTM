@@ -16,11 +16,11 @@ namespace WalkingTec.Mvvm.Admin.Api
     [ActionDescription("用户管理")]
     [ApiController]
     [Route("api/_FrameworkUserBase")]
-	public class _FrameworkUserController : BaseApiController
+    public class _FrameworkUserController : BaseTenantApiController
     {
         [ActionDescription("搜索")]
         [HttpPost("Search")]
-		public string Search(FrameworkUserSearcher searcher)
+        public string Search(FrameworkUserSearcher searcher)
         {
             var vm = CreateVM<FrameworkUserListVM>();
             vm.Searcher = searcher;

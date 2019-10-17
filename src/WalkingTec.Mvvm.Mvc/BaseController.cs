@@ -182,7 +182,7 @@ namespace WalkingTec.Mvvm.Mvc
         #endregion
 
         #region Current User
-        public LoginUserInfo LoginUserInfo
+        public virtual LoginUserInfo LoginUserInfo
         {
             get
             {
@@ -497,7 +497,7 @@ namespace WalkingTec.Mvvm.Mvc
         {
             string cs = CurrentCS;
 
-            if (isLog == true && false)
+            if (isLog == true)
             {
                 if (ConfigInfo.ConnectionStrings?.Where(x => x.Key.ToLower() == "defaultlog").FirstOrDefault() != null)
                 {
@@ -508,7 +508,7 @@ namespace WalkingTec.Mvvm.Mvc
                     cs = "default";
                 }
             }
-            return (IDataContext)GlobaInfo?.DataContextCI?.Invoke(new object[] { ConfigInfo?.ConnectionStrings?.Where(x => x.Key.ToLower() == cs).Select(x => x.Value).FirstOrDefault() ?? cs, CurrentDbType ?? ConfigInfo.DbType });
+            return (IDataContext)GlobaInfo?.DataContextCI?.Invoke(new object[] { ConfigInfo?.ConnectionStrings?.Where(x => x.Key.ToLower() == cs).Select(x => x.Value).FirstOrDefault(), CurrentDbType ?? ConfigInfo.DbType });
         }
 
         #endregion
@@ -580,7 +580,7 @@ namespace WalkingTec.Mvvm.Mvc
         }
         #endregion
 
-        protected T ReadFromCache<T>(string key, Func<T> setFunc, int? timeout = null)
+        protected virtual T ReadFromCache<T>(string key, Func<T> setFunc, int? timeout = null)
         {
             if (Cache.TryGetValue(key, out T rv) == false)
             {

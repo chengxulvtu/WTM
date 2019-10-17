@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,7 +9,7 @@ namespace WalkingTec.Mvvm.Core
     /// <summary>
     /// 用户登录信息，需要保存在Session中，所以使用Serializable标记
     /// </summary>
-    public class LoginUserInfo 
+    public class LoginUserInfo
     {
         public Guid Id { get; set; }
         /// <summary>
@@ -19,6 +19,8 @@ namespace WalkingTec.Mvvm.Core
 
         public string Name { get; set; }
 
+        public string TenantId { get; set; }
+
         public string Memo { get; set; }
 
         public Guid? PhotoId { get; set; }
@@ -27,7 +29,7 @@ namespace WalkingTec.Mvvm.Core
 
         public List<FrameworkGroup> Groups { get; set; }
 
-        public Dictionary<string,object> Attributes { get; set; }
+        public Dictionary<string, object> Attributes { get; set; }
         /// <summary>
         /// 用户的页面权限列表
         /// </summary>

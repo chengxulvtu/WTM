@@ -14,7 +14,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
 {
     [Area("_Admin")]
     [ActionDescription("菜单管理")]
-    public class FrameworkMenuController : BaseController
+    public class FrameworkMenuController : BaseTenantController
     {
         #region 搜索
         [ActionDescription("搜索")]

@@ -10,7 +10,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
 
     [Area("_Admin")]
     [ActionDescription("用户组管理")]
-    public class FrameworkGroupController : BaseController
+    public class FrameworkGroupController : BaseTenantController
     {
         #region 查询
         [ActionDescription("搜索")]

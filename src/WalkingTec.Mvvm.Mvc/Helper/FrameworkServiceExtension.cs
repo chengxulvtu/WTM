@@ -136,6 +136,15 @@ namespace WalkingTec.Mvvm.Mvc
 
 
 
+            services.AddDbContext<TenantDbContext>();
+
+            services.AddSingleton<TenantResolver>();
+            services.AddScoped<TenantContext>();
+            services.AddScoped<HttpTenantResolveMiddleware>();
+            services.AddScoped(sp => sp.GetService<TenantContext>()?.Tenant);
+
+
+
             var mvc = gd.AllAssembly.Where(x => x.ManifestModule.Name == "WalkingTec.Mvvm.Mvc.dll").FirstOrDefault();
             var admin = gd.AllAssembly.Where(x => x.ManifestModule.Name == "WalkingTec.Mvvm.Mvc.Admin.dll").FirstOrDefault();
             services.AddMvc(options =>
@@ -144,6 +153,21 @@ namespace WalkingTec.Mvvm.Mvc
                 options.ModelBinderProviders.Insert(0, new StringBinderProvider());
 
                 // Filters
+
+                if (CsSector == null)
+                {
+                    CsSector = (context) =>
+                    {
+                        var tenant = context.HttpContext.RequestServices.GetService<Tenant>();
+                        if (tenant == null)
+                        {
+                            throw new NullReferenceException(nameof(tenant));
+                        }
+                        return tenant.ConnectionString;
+                    };
+                }
+
+
                 options.Filters.Add(new DataContextFilter(CsSector));
                 options.Filters.Add(new PrivilegeFilter());
                 options.Filters.Add(new FrameworkFilter());
@@ -232,6 +256,9 @@ namespace WalkingTec.Mvvm.Mvc
             {
                 throw new InvalidOperationException("Can not find GlobalData service, make sure you call AddFrameworkService at ConfigService");
             }
+
+            app.UseMiddleware<HttpTenantResolveMiddleware>();
+
             app.UseResponseCaching();
             app.Use(async (context, next) =>
             {
@@ -258,7 +285,8 @@ namespace WalkingTec.Mvvm.Mvc
                     "WalkingTec.Mvvm.Mvc")
             });
             app.UseSession();
-            if(configs.CorsOptions.EnableAll == true){
+            if (configs.CorsOptions.EnableAll == true)
+            {
                 if (configs.CorsOptions?.Policy?.Count > 0)
                 {
                     app.UseCors(configs.CorsOptions.Policy[0].Name);
@@ -309,12 +337,24 @@ namespace WalkingTec.Mvvm.Mvc
 
 
             var test = app.ApplicationServices.GetService<ISpaStaticFileProvider>();
-            var cs = configs.ConnectionStrings.Select(x => x.Value);
-            foreach (var item in cs)
+            //var cs = configs.ConnectionStrings.Select(x => x.Value);
+            //foreach (var item in cs)
+            //{
+            //    var dc = (IDataContext)gd.DataContextCI.Invoke(new object[] { item, configs.DbType });
+            //    dc.DataInit(gd.AllModule, test != null).Wait();
+            //}
+
+            using (var serviceScope = app.ApplicationServices.CreateScope())
             {
-                var dc = (IDataContext)gd.DataContextCI.Invoke(new object[] { item, configs.DbType });
-                dc.DataInit(gd.AllModule, test != null).Wait();
+                var tenantDbContext = serviceScope.ServiceProvider.GetService<TenantDbContext>();
+                var tenants = tenantDbContext.Tenants.ToList();
+                foreach (var tenant in tenants)
+                {
+                    var dc = (IDataContext)gd.DataContextCI.Invoke(new object[] { tenant.ConnectionString, configs.DbType });
+                    dc.DataInit(gd.AllModule, test != null).Wait();
+                }
             }
+
             return app;
         }
 

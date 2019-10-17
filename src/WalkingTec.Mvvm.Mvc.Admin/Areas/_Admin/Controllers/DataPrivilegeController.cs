@@ -10,7 +10,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
 {
     [Area("_Admin")]
     [ActionDescription("数据权限")]
-    public class DataPrivilegeController : BaseController
+    public class DataPrivilegeController : BaseTenantController
     {
         [ActionDescription("搜索")]
         public ActionResult Index()

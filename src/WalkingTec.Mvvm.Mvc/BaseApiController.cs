@@ -86,7 +86,7 @@ namespace WalkingTec.Mvvm.Mvc
             }
         }
 
-        public LoginUserInfo LoginUserInfo
+        public virtual LoginUserInfo LoginUserInfo
         {
             get
             {

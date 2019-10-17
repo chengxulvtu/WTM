@@ -9,7 +9,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
     [Area("_Admin")]
     [ActionDescription("日志")]
     [FixConnection(CsName = "defaultlog")]
-    public class ActionLogController : BaseController
+    public class ActionLogController : BaseTenantController
     {
         [ActionDescription("搜索")]
         public IActionResult Index()

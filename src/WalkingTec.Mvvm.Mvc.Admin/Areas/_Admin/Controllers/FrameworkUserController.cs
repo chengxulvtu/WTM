@@ -13,7 +13,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
 {
     [Area("_Admin")]
     [ActionDescription("用户管理")]
-    public class FrameworkUserController : BaseController
+    public class FrameworkUserController : BaseTenantController
     {
         #region 搜索
         [ActionDescription("搜索")]
@@ -104,7 +104,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         [ActionDescription("修改密码")]
         public ActionResult Password(Guid id)
         {
-            var vm = CreateVM<FrameworkUserVM>(id,passInit:true);
+            var vm = CreateVM<FrameworkUserVM>(id, passInit: true);
             vm.Entity.Password = null;
             return PartialView(vm);
         }
@@ -113,7 +113,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         [HttpPost]
         public ActionResult Password(FrameworkUserVM vm)
         {
-            if (ModelState.Any(x=>x.Key == "Entity.Password" && x.Value.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid))
+            if (ModelState.Any(x => x.Key == "Entity.Password" && x.Value.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid))
             {
                 return PartialView(vm);
             }
@@ -229,7 +229,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         [AllRights]
         public ActionResult GetUserById(string keywords)
         {
-            var users = DC.Set<FrameworkUserBase>().Where(x => x.ITCode.ToLower().StartsWith(keywords.ToLower())).GetSelectListItems(LoginUserInfo.DataPrivileges,null, x=>x.CodeAndName, x => x.ITCode);
+            var users = DC.Set<FrameworkUserBase>().Where(x => x.ITCode.ToLower().StartsWith(keywords.ToLower())).GetSelectListItems(LoginUserInfo.DataPrivileges, null, x => x.CodeAndName, x => x.ITCode);
             return Json(users);
 
         }
