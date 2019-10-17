@@ -36,6 +36,7 @@ using WalkingTec.Mvvm.Core.Implement;
 using WalkingTec.Mvvm.Mvc.Binders;
 using WalkingTec.Mvvm.Mvc.Filters;
 using WalkingTec.Mvvm.Mvc.Json;
+using WalkingTec.Mvvm.Mvc.Model;
 
 namespace WalkingTec.Mvvm.Mvc
 {
@@ -135,7 +136,10 @@ namespace WalkingTec.Mvvm.Mvc
             });
 
 
+            //var path = Assembly.GetEntryAssembly().Location;
+            //var dir = new DirectoryInfo(Path.GetDirectoryName(path));
 
+            //var tenanbDbPath = Path.Combine(dir.FullName, "tenant.db");
             services.AddDbContext<TenantDbContext>();
 
             services.AddSingleton<TenantResolver>();
@@ -159,11 +163,11 @@ namespace WalkingTec.Mvvm.Mvc
                     CsSector = (context) =>
                     {
                         var tenant = context.HttpContext.RequestServices.GetService<Tenant>();
-                        if (tenant == null)
-                        {
-                            throw new NullReferenceException(nameof(tenant));
-                        }
-                        return tenant.ConnectionString;
+                        //if (tenant == null)
+                        //{
+                        //    throw new NullReferenceException(nameof(tenant));
+                        //}
+                        return tenant?.ConnectionString;
                     };
                 }
 
@@ -347,6 +351,7 @@ namespace WalkingTec.Mvvm.Mvc
             using (var serviceScope = app.ApplicationServices.CreateScope())
             {
                 var tenantDbContext = serviceScope.ServiceProvider.GetService<TenantDbContext>();
+                tenantDbContext.Database.EnsureCreated();
                 var tenants = tenantDbContext.Tenants.ToList();
                 foreach (var tenant in tenants)
                 {

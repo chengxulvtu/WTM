@@ -13,7 +13,7 @@ namespace WalkingTec.Mvvm.Admin.Api
     [ActionDescription("用户组管理")]
     [ApiController]
     [Route("api/_FrameworkGroup")]
-	public class _FrameworkGroupController : BaseApiController
+	public class _FrameworkGroupController : BaseTenantApiController
     {
         [ActionDescription("搜索")]
         [HttpPost("Search")]

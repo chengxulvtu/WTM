@@ -41,7 +41,11 @@ namespace WalkingTec.Mvvm.Mvc
             set
             {
                 if (TenantContext.Tenant == null) throw new NullReferenceException(nameof(TenantContext.Tenant));
-                value.TenantId = TenantContext.Tenant.Id;
+                if (value!=null)
+                {
+                    value.TenantId = TenantContext.Tenant.Id;
+                }
+              
                 base.LoginUserInfo = value;
             }
         }

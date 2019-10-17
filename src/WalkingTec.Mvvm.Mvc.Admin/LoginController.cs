@@ -12,7 +12,7 @@ namespace WalkingTec.Mvvm.Admin.Api
     [Route("api/_login")]
     [ActionDescription("登陆")]
     [Public]
-    public class _LoginController : BaseApiController
+    public class _LoginController : BaseTenantApiController
     {
         [HttpPost("login")]
         [ActionDescription("登录")]

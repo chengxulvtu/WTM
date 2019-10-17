@@ -35,5 +35,11 @@ namespace WalkingTec.Mvvm.Mvc
             }
         }
 
+        public override IDataContext CreateDC(bool isLog = false)
+        {
+            return (IDataContext)GlobaInfo?.DataContextCI?.Invoke(new object[] { CurrentCS, CurrentDbType ?? ConfigInfo.DbType });
+        }
+
+
     }
 }

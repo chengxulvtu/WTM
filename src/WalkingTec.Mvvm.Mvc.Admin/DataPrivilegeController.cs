@@ -12,7 +12,7 @@ namespace WalkingTec.Mvvm.Admin.Api
     [ActionDescription("数据权限")]
     [ApiController]
     [Route("api/_DataPrivilege")]
-    public class _DataPrivilegeController : BaseApiController
+    public class _DataPrivilegeController : BaseTenantApiController
     {
         [ActionDescription("搜索")]
         [HttpPost("Search")]

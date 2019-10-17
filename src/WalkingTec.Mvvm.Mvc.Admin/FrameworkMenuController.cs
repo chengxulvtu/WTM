@@ -17,7 +17,7 @@ namespace WalkingTec.Mvvm.Admin.Api
     [ActionDescription("菜单管理")]
     [ApiController]
     [Route("api/_FrameworkMenu")]
-	public class _FrameworkMenuController : BaseApiController
+	public class _FrameworkMenuController : BaseTenantApiController
     {
         [ActionDescription("搜索")]
         [HttpPost("Search")]

@@ -14,7 +14,7 @@ namespace WalkingTec.Mvvm.Admin.Api
     [Route("api/_file")]
     [AllRights]
     [ActionDescription("文件操作")]
-    public class _FileApiController : BaseApiController
+    public class _FileApiController : BaseTenantApiController
     {
         [HttpPost("upload")]
         [ActionDescription("上传文件")]
