@@ -20,7 +20,7 @@ namespace WalkingTec.Mvvm.Mvc
 {
     [AllRights]
     [ActionDescription("框架")]
-    public class _FrameworkController : BaseController
+    public class _FrameworkController : BaseTenantController
     {
         private static JsonSerializerSettings _jsonSerializerSettings;
         public static JsonSerializerSettings JsonSerializerSettings

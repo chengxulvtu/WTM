@@ -80,6 +80,9 @@ namespace WalkingTec.Mvvm.Mvc
                 configBuilder
                     .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
             }
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             var config = configBuilder.Build();
 
             var gd = GetGlobalData();
@@ -249,6 +252,9 @@ namespace WalkingTec.Mvvm.Mvc
         public static IApplicationBuilder UseFrameworkService(this IApplicationBuilder app, Action<IRouteBuilder> customRoutes = null)
         {
             IconFontsHelper.GenerateIconFont();
+
+            app.UseMiddleware<HttpTenantResolveMiddleware>();
+
             var configs = app.ApplicationServices.GetRequiredService<Configs>();
             var gd = app.ApplicationServices.GetRequiredService<GlobalData>();
 
@@ -261,7 +267,7 @@ namespace WalkingTec.Mvvm.Mvc
                 throw new InvalidOperationException("Can not find GlobalData service, make sure you call AddFrameworkService at ConfigService");
             }
 
-            app.UseMiddleware<HttpTenantResolveMiddleware>();
+
 
             app.UseResponseCaching();
             app.Use(async (context, next) =>
@@ -391,10 +397,15 @@ namespace WalkingTec.Mvvm.Mvc
             {
                 var menus = new List<FrameworkMenu>();
                 var cache = GlobalServices.GetService<IMemoryCache>();
-                var menuCacheKey = "FFMenus";
+
+                var httpContextAccessor = GlobalServices.GetService<IHttpContextAccessor>();
+                var tenantResolver = GlobalServices.GetService<TenantResolver>();
+                var tenant = tenantResolver.ResolveByHost(httpContextAccessor.HttpContext.Request.Host.ToString());
+
+                var menuCacheKey = $"{tenant.Id}_FFMenus";
                 if (cache.TryGetValue(menuCacheKey, out List<FrameworkMenu> rv) == false)
                 {
-                    var data = GetAllMenus(gd.AllModule, gd.DataContextCI);
+                    var data = GetAllMenus(gd.AllModule, gd.DataContextCI, tenant);
                     cache.Set(menuCacheKey, data);
                     menus = data;
                 }
@@ -408,9 +419,10 @@ namespace WalkingTec.Mvvm.Mvc
             return gd;
         }
 
-        private static List<FrameworkMenu> GetAllMenus(List<FrameworkModule> allModule, ConstructorInfo constructorInfo)
+        private static List<FrameworkMenu> GetAllMenus(List<FrameworkModule> allModule, ConstructorInfo constructorInfo, Tenant tenant)
         {
             var ConfigInfo = GlobalServices.GetService<Configs>();
+
             var menus = new List<FrameworkMenu>();
 
             if (ConfigInfo.IsQuickDebug)
@@ -443,7 +455,7 @@ namespace WalkingTec.Mvvm.Mvc
             {
                 try
                 {
-                    using (var dc = (IDataContext)constructorInfo?.Invoke(new object[] { ConfigInfo.ConnectionStrings.Where(x => x.Key.ToLower() == "default").Select(x => x.Value).FirstOrDefault(), ConfigInfo.DbType }))
+                    using (var dc = (IDataContext)constructorInfo?.Invoke(new object[] { tenant.ConnectionString, ConfigInfo.DbType }))
                     {
                         menus.AddRange(dc?.Set<FrameworkMenu>()
                                 .Include(x => x.Domain)
