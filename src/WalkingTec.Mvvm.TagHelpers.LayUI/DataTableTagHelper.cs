@@ -323,7 +323,7 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI
             {
                 ListVM.NeedPage = false;
             }
-            else 
+            else
             {
                 if (string.IsNullOrEmpty(Url))
                 {
@@ -346,8 +346,8 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI
                     {
                         if (!_excludeParams.Contains(prop.Name))
                         {
-                            if(prop.PropertyType.IsGenericType == false || (prop.PropertyType.GenericTypeArguments[0] != typeof(ComboSelectListItem) && prop.PropertyType.GenericTypeArguments[0] != typeof(TreeSelectListItem)))
-                            Filter.Add($"Searcher.{prop.Name}", prop.GetValue(ListVM.Searcher));
+                            if (prop.PropertyType.IsGenericType == false || (prop.PropertyType.GenericTypeArguments[0] != typeof(ComboSelectListItem) && prop.PropertyType.GenericTypeArguments[0] != typeof(TreeSelectListItem)))
+                                Filter.Add($"Searcher.{prop.Name}", prop.GetValue(ListVM.Searcher));
                         }
                     }
                 }
@@ -793,7 +793,7 @@ case '{item.Area + item.ControllerName + item.ActionName + item.QueryString}':{{
                         }
                         else
                         {
-                            if ( (item.Area == string.Empty && item.ControllerName == "_Framework" && item.ActionName == "GetExportExcel") || item.ActionName == "ExportExcel")
+                            if ((item.Area == string.Empty && item.ControllerName == "_Framework" && item.ActionName == "GetExportExcel") || item.ActionName == "ExportExcel")
                             {
                                 actionScript = $"ff.DownloadExcelOrPdf(tempUrl,'{SearchPanelId}',{JsonConvert.SerializeObject(Filter)},ids);";
                             }
@@ -812,7 +812,7 @@ case '{item.Area + item.ControllerName + item.ActionName + item.QueryString}':{{
                     }
                     else
                     {
-                        actionScript = $"{item.OnClickFunc}();";
+                        actionScript = $"{item.OnClickFunc}(data);";
                     }
                     gridBtnEventStrBuilder.Append($@"
 var isPost = false;
