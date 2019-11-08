@@ -272,7 +272,7 @@ namespace WalkingTec.Mvvm.Core.Extensions
         {
             var dpsSetting = GlobalServices.GetService<Configs>().DataPrivilegeSettings;
             ParameterExpression pe = Expression.Parameter(typeof(T));
-            Expression peid = Expression.Property(pe, typeof(T).GetProperties().Where(x=>x.Name.ToLower() == "id").FirstOrDefault());
+            Expression peid = Expression.Property(pe, typeof(T).GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault());
             //循环数据权限，加入到where条件中，达到自动过滤的效果
             if (dpsSetting?.Where(x => x.ModelName == query.ElementType.Name).SingleOrDefault() != null)
             {
@@ -383,7 +383,7 @@ namespace WalkingTec.Mvvm.Core.Extensions
                     {
                         fieldName = fieldName.Remove(fieldName.Length - 2);
                         //var IsTableName = tableName?.Where(x => x == fieldName).FirstOrDefault();
-                        var IsTableName = tableName?. Where(x => x.ToLower().Contains(fieldName.ToLower())).FirstOrDefault();
+                        var IsTableName = tableName?.Where(x => x.ToLower().Contains(fieldName.ToLower())).FirstOrDefault();
                         if (string.IsNullOrEmpty(IsTableName))
                         {
                             continue;
@@ -547,7 +547,7 @@ namespace WalkingTec.Mvvm.Core.Extensions
             Expression peid = Expression.Property(pe, idproperty);
             var convertid = PropertyHelper.ConvertValue(val, idproperty.PropertyType);
             return baseQuery.Where(Expression.Lambda<Func<T, bool>>(Expression.Equal(peid, Expression.Constant(convertid)), pe));
-                       
+
         }
 
         public static IQueryable<T> CheckWhere<T, S>(this IQueryable<T> baseQuery, S val, Expression<Func<T, bool>> where)
@@ -560,7 +560,7 @@ namespace WalkingTec.Mvvm.Core.Extensions
             {
                 if (typeof(IList).IsAssignableFrom(val.GetType()))
                 {
-                    if( ((IList)val).Count == 0)
+                    if (((IList)val).Count == 0)
                     {
                         return baseQuery;
                     }
@@ -601,7 +601,7 @@ namespace WalkingTec.Mvvm.Core.Extensions
         public static IQueryable<T> CheckEqual<T, S>(this IQueryable<T> baseQuery, S val, Expression<Func<T, S?>> field)
     where S : struct
         {
-             S? a = val;
+            S? a = val;
             return baseQuery.CheckEqual(a, field);
         }
 
@@ -622,11 +622,11 @@ namespace WalkingTec.Mvvm.Core.Extensions
                 {
                     exp1 = !includeMin ? Expression.GreaterThan(Expression.PropertyOrField(field.Body, "Value"), Expression.Constant(valMin)) : Expression.GreaterThanOrEqual(Expression.PropertyOrField(field.Body, "Value"), Expression.Constant(valMin));
                 }
-                if(valMax != null)
+                if (valMax != null)
                 {
                     exp2 = !includeMax ? Expression.LessThan(Expression.PropertyOrField(field.Body, "Value"), Expression.Constant(valMax)) : Expression.LessThanOrEqual(Expression.PropertyOrField(field.Body, "Value"), Expression.Constant(valMax));
                 }
-                if(exp1 != null && exp2 != null)
+                if (exp1 != null && exp2 != null)
                 {
                     exp = Expression.And(exp1, exp2);
                 }
@@ -687,7 +687,7 @@ where S : struct
             }
         }
 
-        public static IQueryable<T> CheckContain<T,S>(this IQueryable<T> baseQuery, List<S> val, Expression<Func<T,S>> field)
+        public static IQueryable<T> CheckContain<T, S>(this IQueryable<T> baseQuery, List<S> val, Expression<Func<T, S>> field)
         {
             if (val == null || val.Count == 0)
             {
@@ -787,7 +787,7 @@ where S : struct
             }
         }
 
-        public static Expression<Func<TModel, bool>> GetContainIdExpression<TModel>(this List<string> Ids, Expression peid = null) 
+        public static Expression<Func<TModel, bool>> GetContainIdExpression<TModel>(this List<string> Ids, Expression peid = null)
         {
             if (Ids == null)
             {
@@ -804,7 +804,7 @@ where S : struct
             {
                 newids.Add(PropertyHelper.ConvertValue(item, peid.Type));
             }
-             
+
             Expression dpleft = Expression.Constant(newids, typeof(IEnumerable<object>));
             Expression dpleft2 = Expression.Call(typeof(Enumerable), "Cast", new Type[] { peid.Type }, dpleft);
             Expression dpcondition = Expression.Call(typeof(Enumerable), "Contains", new Type[] { peid.Type }, dpleft2, peid);
@@ -833,7 +833,7 @@ where S : struct
     {
         public static void AddParameter(this DbCommand command)
         {
-            
+
         }
     }
 
