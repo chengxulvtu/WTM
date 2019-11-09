@@ -354,6 +354,31 @@ namespace WalkingTec.Mvvm.Core
 
         }
 
+
+        /// <summary>
+        /// 修改，进行默认的修改操作。子类如有自定义操作应重载本函数
+        /// </summary>
+        /// <param name="updateAllFields">为true时，框架会更新当前Entity的全部值，为false时，框架会检查Request.Form里的key，只更新表单提交的字段</param>
+        public virtual void DoEdit(bool updateAllFields = false)
+        {
+            DoEditPrepare(updateAllFields);
+
+            DC.SaveChanges();
+            //删除不需要的附件
+            if (DeletedFileIds != null)
+            {
+                foreach (var item in DeletedFileIds)
+                {
+                    FileAttachmentVM ofa = new FileAttachmentVM();
+                    ofa.CopyContext(this);
+                    ofa.SetEntityById(item);
+                    ofa.DoDelete();
+                }
+            }
+
+        }
+
+
         public virtual async Task DoEditAsync(bool updateAllFields = false)
         {
             DoEditPrepare(updateAllFields);

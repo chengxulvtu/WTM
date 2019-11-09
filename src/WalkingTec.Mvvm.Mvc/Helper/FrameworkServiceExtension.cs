@@ -300,7 +300,7 @@ namespace WalkingTec.Mvvm.Mvc
             services.AddSingleton<ITokenService, TokenService>();
 
             var jwtOptions = config.GetSection("JwtOptions").Get<JwtOptions>();
-            if(jwtOptions == null)
+            if (jwtOptions == null)
             {
                 jwtOptions = new JwtOptions();
             }
@@ -437,28 +437,29 @@ namespace WalkingTec.Mvvm.Mvc
                     }
 
 
-            var test = app.ApplicationServices.GetService<ISpaStaticFileProvider>();
-            //var cs = configs.ConnectionStrings.Select(x => x.Value);
-            //foreach (var item in cs)
-            //{
-            //    var dc = (IDataContext)gd.DataContextCI.Invoke(new object[] { item, configs.DbType });
-            //    dc.DataInit(gd.AllModule, test != null).Wait();
-            //}
+                    var test = app.ApplicationServices.GetService<ISpaStaticFileProvider>();
+                    //var cs = configs.ConnectionStrings.Select(x => x.Value);
+                    //foreach (var item in cs)
+                    //{
+                    //    var dc = (IDataContext)gd.DataContextCI.Invoke(new object[] { item, configs.DbType });
+                    //    dc.DataInit(gd.AllModule, test != null).Wait();
+                    //}
 
-            using (var serviceScope = app.ApplicationServices.CreateScope())
-            {
-                var tenantDbContext = serviceScope.ServiceProvider.GetService<TenantDbContext>();
-                tenantDbContext.Database.EnsureCreated();
-                var tenants = tenantDbContext.Tenants.ToList();
-                foreach (var tenant in tenants)
-                {
-                    var dc = (IDataContext)gd.DataContextCI.Invoke(new object[] { tenant.ConnectionString, configs.DbType });
-                    dc.DataInit(gd.AllModule, test != null).Wait();
-                }
-                GlobalServices.SetServiceProvider(app.ApplicationServices);
-                InitDataBase = true;
+                    using (var serviceScope = app.ApplicationServices.CreateScope())
+                    {
+                        var tenantDbContext = serviceScope.ServiceProvider.GetService<TenantDbContext>();
+                        tenantDbContext.Database.EnsureCreated();
+                        var tenants = tenantDbContext.Tenants.ToList();
+                        foreach (var tenant in tenants)
+                        {
+                            var dc = (IDataContext)gd.DataContextCI.Invoke(new object[] { tenant.ConnectionString, configs.DbType });
+                            dc.DataInit(gd.AllModule, test != null).Wait();
+                        }
+                        GlobalServices.SetServiceProvider(app.ApplicationServices);
+                        InitDataBase = true;
 
 
+                    }
                 }
 
                 if (context.Request.Path == "/")
