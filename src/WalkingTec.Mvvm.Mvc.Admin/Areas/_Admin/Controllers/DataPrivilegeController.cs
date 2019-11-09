@@ -1,18 +1,20 @@
-using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using Microsoft.AspNetCore.Mvc;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Mvc.Admin.ViewModels.DataPrivilegeVMs;
 using WalkingTec.Mvvm.Core.Extensions;
+using System.Threading.Tasks;
 
 namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
 {
     [Area("_Admin")]
-    [ActionDescription("数据权限")]
+    [ActionDescription("DataPrivilege")]
     public class DataPrivilegeController : BaseTenantController
     {
-        [ActionDescription("搜索")]
+        [ActionDescription("Search")]
         public ActionResult Index()
         {
             var vm = CreateVM<DataPrivilegeListVM>();
@@ -20,14 +22,14 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
             return PartialView(vm);
         }
 
-        [ActionDescription("搜索")]
+        [ActionDescription("Search")]
         [HttpPost]
         public string Search(DataPrivilegeListVM vm)
         {
             return vm.GetJson(false);
         }
 
-        [ActionDescription("新建")]
+        [ActionDescription("Create")]
         public ActionResult Create()
         {
             var vm = CreateVM<DataPrivilegeVM>();
@@ -35,8 +37,8 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         }
 
         [HttpPost]
-        [ActionDescription("新建")]
-        public ActionResult Create(DataPrivilegeVM vm)
+        [ActionDescription("Create")]
+        public async Task<ActionResult> Create(DataPrivilegeVM vm)
         {
             if (!ModelState.IsValid)
             {
@@ -44,12 +46,12 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
             }
             else
             {
-                vm.DoAdd();
+                await vm.DoAddAsync();
                 return FFResult().CloseDialog().RefreshGrid();
             }
         }
 
-        [ActionDescription("修改")]
+        [ActionDescription("Edit")]
         public ActionResult Edit(string ModelName, Guid Id, DpTypeEnum Type)
         {
             DataPrivilegeVM vm = null;
@@ -65,9 +67,9 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
             return PartialView(vm);
         }
 
-        [ActionDescription("修改")]
+        [ActionDescription("Edit")]
         [HttpPost]
-        public ActionResult Edit(DataPrivilegeVM vm)
+        public async Task<ActionResult> Edit(DataPrivilegeVM vm)
         {
             if (!ModelState.IsValid)
             {
@@ -75,13 +77,13 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
             }
             else
             {
-                vm.DoEdit();
+                await vm.DoEditAsync();
                 return FFResult().CloseDialog().RefreshGrid();
             }
         }
 
-        [ActionDescription("删除")]
-        public ActionResult Delete(string ModelName, Guid Id, DpTypeEnum Type)
+        [ActionDescription("Delete")]
+        public async Task<ActionResult> Delete(string ModelName, Guid Id, DpTypeEnum Type)
         {
             DataPrivilegeVM vm = null;
             if (Type == DpTypeEnum.User)
@@ -92,7 +94,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
             {
                 vm = CreateVM<DataPrivilegeVM>(values: x => x.Entity.TableName == ModelName && x.Entity.GroupId == Id && x.DpType == Type);
             }
-            vm.DoDelete();
+            await vm.DoDeleteAsync();
             return FFResult().RefreshGrid();
         }
 
@@ -108,7 +110,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
             return Json(AllItems);
         }
 
-        [ActionDescription("导出")]
+        [ActionDescription("Export")]
         [HttpPost]
         public IActionResult ExportExcel(DataPrivilegeListVM vm)
         {

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Localization;
+
 using WalkingTec.Mvvm.Core;
 
 namespace WalkingTec.Mvvm.Mvc
@@ -17,6 +17,8 @@ namespace WalkingTec.Mvvm.Mvc
         IDataContext DC { get; set; }
         LoginUserInfo LoginUserInfo { get; set; }
 
+        IDistributedCache Cache { get; }
+
         string BaseUrl { get; set; }
 
         ActionLog Log { get; set; }
@@ -24,5 +26,7 @@ namespace WalkingTec.Mvvm.Mvc
         IDataContext CreateDC(bool isLog = false);
 
         ModelStateDictionary ModelState { get; }
+
+        IStringLocalizer Localizer { get; }
     }
 }

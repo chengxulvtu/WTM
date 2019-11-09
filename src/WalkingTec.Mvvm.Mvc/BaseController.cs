@@ -1,22 +1,32 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Localization;
+
+using Newtonsoft.Json;
+
 using WalkingTec.Mvvm.Core;
+using WalkingTec.Mvvm.Core.Auth;
 using WalkingTec.Mvvm.Core.Extensions;
 
 namespace WalkingTec.Mvvm.Mvc
 {
     public abstract class BaseController : Controller, IBaseController
     {
+        public BaseController()
+        {
+        }
+
         private Configs _configInfo;
         public Configs ConfigInfo
         {
@@ -33,6 +43,7 @@ namespace WalkingTec.Mvvm.Mvc
                 _configInfo = value;
             }
         }
+
         private GlobalData _globaInfo;
         public GlobalData GlobaInfo
         {
@@ -67,21 +78,21 @@ namespace WalkingTec.Mvvm.Mvc
             }
         }
 
-        private IMemoryCache _cache;
-        protected IMemoryCache Cache
+        private IDistributedCache _cache;
+        public IDistributedCache Cache
         {
             get
             {
                 if (_cache == null)
                 {
-                    _cache = (IMemoryCache)HttpContext.RequestServices.GetService(typeof(IMemoryCache));
+                    _cache = (IDistributedCache)HttpContext.RequestServices.GetService(typeof(IDistributedCache));
                 }
                 return _cache;
             }
-        }
-
-        public BaseController()
-        {
+            set
+            {
+                _cache = value;
+            }
         }
 
         public string CurrentCS { get; set; }
@@ -105,6 +116,7 @@ namespace WalkingTec.Mvvm.Mvc
                 return rv ?? string.Empty;
             }
         }
+
         public string CurrentWindowId
         {
             get
@@ -122,6 +134,7 @@ namespace WalkingTec.Mvvm.Mvc
                 return rv ?? string.Empty;
             }
         }
+
         public string WindowIds
         {
             get
@@ -143,7 +156,8 @@ namespace WalkingTec.Mvvm.Mvc
             }
         }
 
-        #region DataContext 
+        #region DataContext
+
         private IDataContext _dc;
         public IDataContext DC
         {
@@ -160,9 +174,11 @@ namespace WalkingTec.Mvvm.Mvc
                 _dc = value;
             }
         }
+
         #endregion
 
-        #region Domain 
+        #region Domain
+
         public List<FrameworkDomain> Domains
         {
             get
@@ -176,23 +192,80 @@ namespace WalkingTec.Mvvm.Mvc
                 });
             }
         }
-
         public static Guid? DomainId { get; set; }
 
         #endregion
 
         #region Current User
+
+        private LoginUserInfo _loginUserInfo;
         public virtual LoginUserInfo LoginUserInfo
         {
             get
             {
-                return HttpContext.Session?.Get<LoginUserInfo>("UserInfo");
+                if (User?.Identity?.IsAuthenticated == true  && _loginUserInfo == null) // 用户认证通过后，当前上下文不包含用户数据
+                {
+                    var userIdStr = User.Claims.SingleOrDefault(x => x.Type == AuthConstants.JwtClaimTypes.Subject).Value;
+                    Guid userId = Guid.Parse(userIdStr);
+                    var cacheKey = $"{GlobalConstants.CacheKey.UserInfo}:{userIdStr}";
+                    _loginUserInfo = Cache.Get<LoginUserInfo>(cacheKey);
+                    if (_loginUserInfo == null || _loginUserInfo.Id != userId)
+                    {
+                        var userInfo = DC.Set<FrameworkUserBase>()
+                                            .Include(x => x.UserRoles)
+                                            .Include(x => x.UserGroups)
+                                            .Where(x => x.ID == userId)
+                                            .SingleOrDefault();
+                        if (userInfo != null)
+                        {
+                            // 初始化用户信息
+                            var roleIDs = userInfo.UserRoles.Select(x => x.RoleId).ToList();
+                            var groupIDs = userInfo.UserGroups.Select(x => x.GroupId).ToList();
+                            var dataPris = DC.Set<DataPrivilege>()
+                                            .Where(x => x.UserId == userInfo.ID || (x.GroupId != null && groupIDs.Contains(x.GroupId.Value)))
+                                            .ToList();
+
+                            //查找登录用户的页面权限
+                            var funcPrivileges = DC.Set<FunctionPrivilege>()
+                                .Where(x => x.UserId == userInfo.ID || (x.RoleId != null && roleIDs.Contains(x.RoleId.Value)))
+                                .ToList();
+
+                            _loginUserInfo = new LoginUserInfo
+                            {
+                                Id = userInfo.ID,
+                                ITCode = userInfo.ITCode,
+                                Name = userInfo.Name,
+                                PhotoId = userInfo.PhotoId,
+                                Roles = DC.Set<FrameworkRole>().Where(x => userInfo.UserRoles.Select(y => y.RoleId).Contains(x.ID)).ToList(),
+                                Groups = DC.Set<FrameworkGroup>().Where(x => userInfo.UserGroups.Select(y => y.GroupId).Contains(x.ID)).ToList(),
+                                DataPrivileges = dataPris,
+                                FunctionPrivileges = funcPrivileges
+                            };
+                            Cache.Add(cacheKey, _loginUserInfo);
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                }
+                return _loginUserInfo;
             }
             set
             {
-                HttpContext.Session?.Set<LoginUserInfo>("UserInfo", value);
+                if (value == null)
+                {
+                    Cache.Add($"{GlobalConstants.CacheKey.UserInfo}:{_loginUserInfo.Id}", value);
+                    _loginUserInfo = value;
+                }
+                else
+                {
+                    _loginUserInfo = value;
+                    Cache.Add($"{GlobalConstants.CacheKey.UserInfo}:{_loginUserInfo.Id}", value);
+                }
             }
         }
+
         #endregion
 
         #region GUID
@@ -211,13 +284,38 @@ namespace WalkingTec.Mvvm.Mvc
         }
         #endregion
 
-        #region Menus 
+        #region Menus
         public List<FrameworkMenu> FFMenus => GlobaInfo.AllMenus;
         #endregion
 
         #region URL
         public string BaseUrl { get; set; }
         #endregion
+
+        private IStringLocalizer _localizer;
+        public IStringLocalizer Localizer
+        {
+            get
+            {
+                if (_localizer == null)
+                {
+                    var programtype = this.GetType().Assembly.GetTypes().Where(x => x.Name == "Program").FirstOrDefault();
+                    if (programtype != null)
+                    {
+                        try
+                        {
+                            _localizer = GlobalServices.GetRequiredService(typeof(IStringLocalizer<>).MakeGenericType(programtype)) as IStringLocalizer;
+                        }
+                        catch { }
+                    }
+                    if (_localizer == null)
+                    {
+                        _localizer = WalkingTec.Mvvm.Core.Program._localizer;
+                    }
+                }
+                return _localizer;
+            }
+        }
 
         public ActionLog Log { get; set; }
 
@@ -244,6 +342,8 @@ namespace WalkingTec.Mvvm.Mvc
             }
             catch { }
             rv.ConfigInfo = ConfigInfo;
+            rv.Cache = Cache;
+            rv.LoginUserInfo = LoginUserInfo;
             rv.DataContextCI = GlobaInfo?.DataContextCI;
             rv.DC = this.DC;
             rv.MSD = new ModelStateServiceProvider(ModelState);
@@ -256,6 +356,7 @@ namespace WalkingTec.Mvvm.Mvc
             rv.Log = this.Log;
             rv.Controller = this;
             rv.ControllerName = this.GetType().FullName;
+            rv.Localizer = this.Localizer;
             if (HttpContext != null && HttpContext.Request != null)
             {
                 try
@@ -587,11 +688,14 @@ namespace WalkingTec.Mvvm.Mvc
                 T data = setFunc();
                 if (timeout == null)
                 {
-                    Cache.Set(key, data);
+                    Cache.Add(key, data);
                 }
                 else
                 {
-                    Cache.Set(key, data, DateTime.Now.AddSeconds(timeout.Value).Subtract(DateTime.Now));
+                    Cache.Add(key, data, new DistributedCacheEntryOptions()
+                    {
+                        SlidingExpiration = new TimeSpan(timeout.Value)
+                    });
                 }
                 return data;
             }
@@ -599,20 +703,6 @@ namespace WalkingTec.Mvvm.Mvc
             {
                 return rv;
             }
-        }
-
-        public override void OnActionExecuting(ActionExecutingContext context)
-        {
-            var ctrlActDes = context.ActionDescriptor as ControllerActionDescriptor;
-            BaseUrl = $"/{ctrlActDes.ControllerName}/{ctrlActDes.ActionName}";
-            BaseUrl += context.HttpContext.Request.QueryString.ToUriComponent();
-            if (context.RouteData.Values["area"] != null)
-            {
-                BaseUrl = $"/{context.RouteData.Values["area"]}{BaseUrl}";
-            }
-
-
-            base.OnActionExecuting(context);
         }
 
         public void DoLog(string msg, ActionLogTypesEnum logtype = ActionLogTypesEnum.Debug)

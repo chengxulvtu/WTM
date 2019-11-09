@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Mvc.Admin.Controllers;
 using WalkingTec.Mvvm.Mvc.Admin.ViewModels.FrameworkUserVms;
@@ -50,7 +50,7 @@ namespace WalkingTec.Mvvm.Admin.Test
 
             FrameworkUserVM vm = rv.Model as FrameworkUserVM;
             FrameworkUserBase v = new FrameworkUserBase();
-            
+
             v.ITCode = "itcode";
             v.Name = "name";
             v.Password = "password";
@@ -175,6 +175,7 @@ namespace WalkingTec.Mvvm.Admin.Test
 
             PartialViewResult rv = (PartialViewResult)_controller.BatchDelete(new string[] { v1.ID.ToString(), v2.ID.ToString() });
             Assert.IsInstanceOfType(rv.Model, typeof(FrameworkUserBatchVM));
+            (rv.Model as FrameworkUserBatchVM).ListVM.DoSearch();
 
             FrameworkUserBatchVM vm = rv.Model as FrameworkUserBatchVM;
             vm.Ids = new string[] { v1.ID.ToString(), v2.ID.ToString() };

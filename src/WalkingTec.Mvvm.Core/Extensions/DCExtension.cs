@@ -1,12 +1,12 @@
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 using System.Transactions;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace WalkingTec.Mvvm.Core.Extensions
 {
@@ -76,15 +76,15 @@ namespace WalkingTec.Mvvm.Core.Extensions
             var textMI = typeof(TreeSelectListItem).GetMember("Text")[0];
             MemberBinding textBind = Expression.Bind(textMI, cp.Change(textField.Body, pe));
 
-            //绑定Value字段，形成类似 Value = valueField 的表达式 
+            //绑定Value字段，形成类似 Value = valueField 的表达式
             var valueMI = typeof(TreeSelectListItem).GetMember("Id")[0];
             MemberBinding valueBind = Expression.Bind(valueMI, cp.Change(valueField.Body, pe));
 
-            //绑定ParentId字段，形成类似 Value = valueField 的表达式 
+            //绑定ParentId字段，形成类似 Value = valueField 的表达式
             var parentMI = typeof(TreeSelectListItem).GetMember("ParentId")[0];
             MemberBinding parentBind = Expression.Bind(parentMI, cp.Change(parentField.Body, pe));
 
-            //绑定Url字段，形成类似 Value = valueField 的表达式 
+            //绑定Url字段，形成类似 Value = valueField 的表达式
             MemberBinding urlBind = null;
             var urlMI = typeof(TreeSelectListItem).GetMember("Url")[0];
             if (urlField != null)
@@ -96,7 +96,7 @@ namespace WalkingTec.Mvvm.Core.Extensions
                 urlBind = Expression.Bind(urlMI, Expression.Constant(string.Empty));
             }
 
-            //绑定icon字段，形成类似 ICon = iconField 的表达式 
+            //绑定icon字段，形成类似 ICon = iconField 的表达式
             MemberBinding iconBind = null;
             var iconMI = typeof(TreeSelectListItem).GetMember("ICon")[0];
             if (iconField != null)
@@ -108,7 +108,7 @@ namespace WalkingTec.Mvvm.Core.Extensions
                 iconBind = Expression.Bind(iconMI, Expression.Constant(string.Empty));
             }
 
-            //绑定Tag字段，形成类似 Value = valueField 的表达式 
+            //绑定Tag字段，形成类似 Value = valueField 的表达式
             MemberBinding tagBind = null;
             var tagMI = typeof(TreeSelectListItem).GetMember("Tag")[0];
             if (tagField != null)
@@ -120,7 +120,7 @@ namespace WalkingTec.Mvvm.Core.Extensions
                 tagBind = Expression.Bind(tagMI, Expression.Constant(""));
             }
 
-            //绑定Tag字段，形成类似 Value = valueField 的表达式 
+            //绑定Tag字段，形成类似 Value = valueField 的表达式
             MemberBinding expandBind = null;
             var expandMI = typeof(TreeSelectListItem).GetMember("Expended")[0];
             if (expandField != null)
@@ -219,7 +219,7 @@ namespace WalkingTec.Mvvm.Core.Extensions
             MemberBinding textBind = Expression.Bind(textMI, cp.Change(textField.Body, pe));
 
 
-            //绑定Value字段，形成类似 Value = valueField 的表达式 
+            //绑定Value字段，形成类似 Value = valueField 的表达式
             var valueMI = typeof(ComboSelectListItem).GetMember("Value")[0];
             MemberBinding valueBind = Expression.Bind(valueMI, cp.Change(valueField.Body, pe));
 
@@ -804,10 +804,10 @@ where S : struct
             {
                 newids.Add(PropertyHelper.ConvertValue(item, peid.Type));
             }
-
             Expression dpleft = Expression.Constant(newids, typeof(IEnumerable<object>));
             Expression dpleft2 = Expression.Call(typeof(Enumerable), "Cast", new Type[] { peid.Type }, dpleft);
-            Expression dpcondition = Expression.Call(typeof(Enumerable), "Contains", new Type[] { peid.Type }, dpleft2, peid);
+            Expression dpleft3 = Expression.Call(typeof(Enumerable), "ToList", new Type[] { peid.Type }, dpleft2);
+            Expression dpcondition = Expression.Call(typeof(Enumerable), "Contains", new Type[] { peid.Type }, dpleft3, peid);
             var rv = Expression.Lambda<Func<TModel, bool>>(dpcondition, pe);
             return rv;
         }

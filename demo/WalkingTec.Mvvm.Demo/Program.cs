@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using Swashbuckle.AspNetCore.Swagger;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Demo.Models;
@@ -51,6 +52,17 @@ namespace WalkingTec.Mvvm.Demo
                         x.AddSwaggerGen(c =>
                         {
                             c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+                            c.AddSecurityDefinition("Bearer", new ApiKeyScheme()
+                            {
+                                Description = "JWT Bearer",
+                                Name = "Authorization",
+                                In = "header",
+                                Type = "apiKey"
+                            });
+                            c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                            {
+                                { "Bearer", new string[] { } }
+                            });
                         });
                     })
                     .Configure(x =>

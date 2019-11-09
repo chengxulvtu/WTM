@@ -33,7 +33,8 @@ namespace WalkingTec.Mvvm.Core
         public DbSet<FrameworkRole> BaseFrameworkRoles { get; set; }
         public DbSet<FrameworkGroup> BaseFrameworkGroups { get; set; }
         public DbSet<ActionLog> BaseActionLogs { get; set; }
-        public DbSet<FrameworkArea> BaseFrameworkAreas { get; set; }
+        //public DbSet<FrameworkArea> BaseFrameworkAreas { get; set; }
+        public DbSet<PersistedGrant> PersistedGrants { get; set; }
 
 
 
@@ -245,7 +246,7 @@ namespace WalkingTec.Mvvm.Core
             }
 
             // 获取类型 T 下 List<S> 类型的属性对应的类型 S，且S 必须是 TopBasePoco 的子类，只有这些类会生成库
-            for (int i = 0; i < allTypes.Count; i++) // 
+            for (int i = 0; i < allTypes.Count; i++) //
             {
                 var item = allTypes[i];
                 var pros = item.GetProperties();
@@ -354,11 +355,11 @@ namespace WalkingTec.Mvvm.Core
                 var AllModules = allModules as List<FrameworkModule>;
                 var roles = new FrameworkRole[]
                 {
-                    new FrameworkRole{ RoleCode = "001", RoleName = "超级管理员"}
+                    new FrameworkRole{ RoleCode = "001", RoleName = Program._localizer["Admin"]}
                 };
                 var users = new FrameworkUserBase[]
                 {
-                    new FrameworkUserBase{ITCode = "admin", Password = Utils.GetMD5String("000000"), IsValid = true, Name="超级管理员"}
+                    new FrameworkUserBase{ITCode = "admin", Password = Utils.GetMD5String("000000"), IsValid = true, Name=Program._localizer["Admin"]}
                 };
                 var userroles = new FrameworkUserRole[]
                 {
@@ -368,7 +369,7 @@ namespace WalkingTec.Mvvm.Core
                 var adminRole = roles[0];
                 if (Set<FrameworkMenu>().Any() == false)
                 {
-                    var systemManagement = GetFolderMenu("系统管理", new List<FrameworkRole> { adminRole }, null);
+                    var systemManagement = GetFolderMenu(Program._localizer["SystemManagement"], new List<FrameworkRole> { adminRole }, null);
                     var logList = IsSpa ? GetMenu2(AllModules, "ActionLog", new List<FrameworkRole> { adminRole }, null, 1) : GetMenu(AllModules, "_Admin", "ActionLog", "Index", new List<FrameworkRole> { adminRole }, null, 1);
                     var userList = IsSpa ? GetMenu2(AllModules, "FrameworkUser", new List<FrameworkRole> { adminRole }, null, 2) : GetMenu(AllModules, "_Admin", "FrameworkUser", "Index", new List<FrameworkRole> { adminRole }, null, 2);
                     var roleList = IsSpa ? GetMenu2(AllModules, "FrameworkRole", new List<FrameworkRole> { adminRole }, null, 3) : GetMenu(AllModules, "_Admin", "FrameworkRole", "Index", new List<FrameworkRole> { adminRole }, null, 3);
@@ -393,7 +394,7 @@ namespace WalkingTec.Mvvm.Core
                         var menuList2 = GetMenu2(AllModules, "FrameworkMenu", new List<FrameworkRole> { adminRole }, null, 5);
                         var dpList2 = GetMenu2(AllModules, "DataPrivilege", new List<FrameworkRole> { adminRole }, null, 6);
                         var apis = new FrameworkMenu[] { logList2, userList2, roleList2, groupList2, menuList2, dpList2};
-                        apis.ToList().ForEach(x => { x.ShowOnMenu = false;x.PageName += "(内置api)"; });
+                        apis.ToList().ForEach(x => { x.ShowOnMenu = false;x.PageName += $"({Program._localizer["BuildinApi"]})"; });
                         apifolder.Children.AddRange(apis);
                         Set<FrameworkMenu>().Add(apifolder);
                     }
@@ -462,7 +463,7 @@ namespace WalkingTec.Mvvm.Core
 
         private FrameworkMenu GetMenu2(List<FrameworkModule> allModules, string controllerName, List<FrameworkRole> allowedRoles, List<FrameworkUserBase> allowedUsers, int displayOrder)
         {
-            var acts = allModules.Where(x => x.ClassName == "_"+controllerName && x.IsApi == true).SelectMany(x => x.Actions).ToList();
+            var acts = allModules.Where(x => x.FullName == $"WalkingTec.Mvvm.Admin.Api,{controllerName}" && x.IsApi == true).SelectMany(x => x.Actions).ToList();
             var rest = acts.Where(x => x.IgnorePrivillege == false).ToList();
             FrameworkMenu menu = GetMenuFromAction(acts[0], true, allowedRoles, allowedUsers, displayOrder);
             if (menu != null)
@@ -470,8 +471,8 @@ namespace WalkingTec.Mvvm.Core
                 menu.Url = "/" + acts[0].Module.ClassName.ToLower();
                 menu.ModuleName = acts[0].Module.ModuleName;
                 menu.PageName = menu.ModuleName;
-                menu.ActionName = "主页面";
-                menu.ClassName = acts[0].Module.ClassName;
+                menu.ActionName = Program._localizer["MainPage"];
+                menu.ClassName = acts[0].Module.FullName;
                 menu.MethodName = null;
                 for (int i = 0; i < rest.Count; i++)
                 {
@@ -494,7 +495,7 @@ namespace WalkingTec.Mvvm.Core
             {
                 //ActionId = act.ID,
                 //ModuleId = act.ModuleId,
-                ClassName = act.Module.ClassName,
+                ClassName = act.Module.FullName,
                 MethodName = act.MethodName,
                 Url = act.Url,
                 Privileges = new List<FunctionPrivilege>(),

@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Core.Extensions;
 using WalkingTec.Mvvm.Mvc.Admin.ViewModels.FrameworkRoleVMs;
@@ -8,17 +11,17 @@ using WalkingTec.Mvvm.Mvc.Admin.ViewModels.FrameworkRoleVMs;
 namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
 {
     [Area("_Admin")]
-    [ActionDescription("角色管理")]
+    [ActionDescription("RoleManagement")]
     public class FrameworkRoleController : BaseTenantController
     {
         #region 查询
-        [ActionDescription("搜索")]
+        [ActionDescription("Search")]
         public ActionResult Index()
         {
             var vm = CreateVM<FrameworkRoleListVM>();
             return PartialView(vm);
         }
-        [ActionDescription("搜索")]
+        [ActionDescription("Search")]
         [HttpPost]
         public string Search(FrameworkRoleListVM vm)
         {
@@ -27,7 +30,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         #endregion
 
         #region 新建
-        [ActionDescription("新建")]
+        [ActionDescription("Create")]
         public ActionResult Create()
         {
             var vm = CreateVM<FrameworkRoleVM>();
@@ -35,7 +38,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         }
 
         [HttpPost]
-        [ActionDescription("新建")]
+        [ActionDescription("Create")]
         public ActionResult Create(FrameworkRoleVM vm)
         {
             if (!ModelState.IsValid)
@@ -51,7 +54,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         #endregion
 
         #region 修改
-        [ActionDescription("修改")]
+        [ActionDescription("Edit")]
         public ActionResult Edit(Guid id)
         {
             var vm = CreateVM<FrameworkRoleVM>(id);
@@ -59,7 +62,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         }
 
         [HttpPost]
-        [ActionDescription("修改")]
+        [ActionDescription("Edit")]
         public ActionResult Edit(FrameworkRoleVM vm)
         {
             if (!ModelState.IsValid)
@@ -75,7 +78,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         #endregion
 
         #region 删除
-        [ActionDescription("删除")]
+        [ActionDescription("Delete")]
         public ActionResult Delete(Guid id)
         {
             var vm = CreateVM<FrameworkRoleVM>(id);
@@ -83,13 +86,15 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         }
 
         [HttpPost]
-        [ActionDescription("删除")]
-        public ActionResult Delete(Guid id, IFormCollection noUse)
+        [ActionDescription("Delete")]
+        public async Task<ActionResult> Delete(Guid id, IFormCollection noUse)
         {
             var vm = CreateVM<FrameworkRoleVM>(id);
             vm.DoDelete();
             if (!ModelState.IsValid)
             {
+                var userids = DC.Set<FrameworkUserRole>().Where(x => x.RoleId == id).Select(x => x.UserId.ToString()).ToArray();
+                await LoginUserInfo.RemoveUserCache(userids);
                 return PartialView(vm);
             }
             else
@@ -101,7 +106,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
 
         #region 批量删除
         [HttpPost]
-        [ActionDescription("批量删除")]
+        [ActionDescription("BatchDelete")]
         public ActionResult BatchDelete(Guid[] ids)
         {
             var vm = CreateVM<FrameworkRoleBatchVM>(Ids: ids);
@@ -109,8 +114,8 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         }
 
         [HttpPost]
-        [ActionDescription("批量删除")]
-        public ActionResult DoBatchDelete(FrameworkRoleBatchVM vm, IFormCollection noUse)
+        [ActionDescription("BatchDelete")]
+        public async Task<ActionResult> DoBatchDelete(FrameworkRoleBatchVM vm, IFormCollection noUse)
         {
             if (!ModelState.IsValid || !vm.DoBatchDelete())
             {
@@ -118,13 +123,20 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
             }
             else
             {
+                List<Guid?> roleids = new List<Guid?>();
+                foreach (var item in vm?.Ids)
+                {
+                    roleids.Add(Guid.Parse(item));
+                }
+                var userids = DC.Set<FrameworkUserRole>().Where(x => roleids.Contains(x.RoleId)).Select(x => x.UserId.ToString()).ToArray();
+                await LoginUserInfo.RemoveUserCache(userids);
                 return FFResult().CloseDialog().RefreshGrid();
             }
         }
         #endregion
 
         #region 导入
-        [ActionDescription("导入")]
+        [ActionDescription("Import")]
         public ActionResult Import()
         {
             var vm = CreateVM<FrameworkRoleImportVM>();
@@ -132,7 +144,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         }
 
         [HttpPost]
-        [ActionDescription("导入")]
+        [ActionDescription("Import")]
         public ActionResult Import(FrameworkRoleImportVM vm, IFormCollection nouse)
         {
             if (vm.ErrorListVM.EntityList.Count > 0 || !vm.BatchSaveData())
@@ -141,13 +153,13 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
             }
             else
             {
-                return FFResult().CloseDialog().RefreshGrid().Alert("成功导入 " + vm.EntityList.Count.ToString() + " 行数据");
+                return FFResult().CloseDialog().RefreshGrid().Alert(Program._localizer["ImportSuccess", vm.EntityList.Count.ToString()]);
             }
         }
         #endregion
 
         #region 详细
-        [ActionDescription("详细")]
+        [ActionDescription("Details")]
         public PartialViewResult Details(Guid id)
         {
             var role = CreateVM<FrameworkRoleMDVM>(id);
@@ -157,7 +169,7 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
         #endregion
 
         #region 页面权限
-        [ActionDescription("页面权限")]
+        [ActionDescription("PageFunction")]
         public PartialViewResult PageFunction(Guid id)
         {
             var role = CreateVM<FrameworkRoleMDVM>(id);
@@ -165,16 +177,16 @@ namespace WalkingTec.Mvvm.Mvc.Admin.Controllers
             return PartialView(role);
         }
 
-        [ActionDescription("页面权限")]
+        [ActionDescription("PageFunction")]
         [HttpPost]
-        public ActionResult PageFunction(FrameworkRoleMDVM vm, IFormCollection noUse)
+        public async Task<ActionResult> PageFunction(FrameworkRoleMDVM vm, IFormCollection noUse)
         {
-            vm.DoChange();
-            return FFResult().CloseDialog().Alert("操作成功");
+            await vm.DoChangeAsync();
+            return FFResult().CloseDialog().Alert(Program._localizer["OprationSuccess"]);
         }
         #endregion
 
-        [ActionDescription("导出")]
+        [ActionDescription("Export")]
         [HttpPost]
         public IActionResult ExportExcel(FrameworkRoleListVM vm)
         {

@@ -168,7 +168,7 @@ namespace WalkingTec.Mvvm.Core
                     {
                         if (!ErrorMessage.ContainsKey(id))
                         {
-                            ErrorMessage.Add(id, "已回滚");
+                            ErrorMessage.Add(id, Program._localizer["Rollback"]);
                         }
                     }
                 }
@@ -180,10 +180,11 @@ namespace WalkingTec.Mvvm.Core
                         item.BatchError = ErrorMessage.Where(x => x.Key == item.GetID().ToString()).Select(x => x.Value).FirstOrDefault();
                     }
                 }
-                MSD.AddModelError("", "数据已被使用，无法删除");
+                MSD.AddModelError("", Program._localizer["DataCannotDelete"]);
             }
             return rv;
         }
+
 
         /// <summary>
         /// 批量修改，默认对Ids中包含的数据进行修改，子类如果有特殊判断应重载本函数
@@ -217,7 +218,7 @@ namespace WalkingTec.Mvvm.Core
                     }
                     if (entity == null)
                     {
-                        ErrorMessage.Add(idsData[i], "数据不存在");
+                        ErrorMessage.Add(idsData[i], Program._localizer["DataNotExist"]);
                         rv = false;
                         break;
                     }
@@ -313,7 +314,7 @@ namespace WalkingTec.Mvvm.Core
                     {
                         if (!ErrorMessage.ContainsKey(id))
                         {
-                            ErrorMessage.Add(id, "已回滚");
+                            ErrorMessage.Add(id, Program._localizer["Rollback"]);
                         }
                     }
                 }

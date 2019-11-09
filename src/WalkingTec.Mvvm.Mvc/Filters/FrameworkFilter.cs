@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
 using System.Text;
+using Microsoft.Extensions.Localization;
 
 namespace WalkingTec.Mvvm.Mvc.Filters
 {
@@ -41,8 +42,8 @@ namespace WalkingTec.Mvvm.Mvc.Filters
 
             log.ITCode = ctrl.LoginUserInfo?.ITCode ?? string.Empty;
             //给日志的多语言属性赋值
-            log.ModuleName = ctrlDes?.Description ?? ctrlActDesc.ControllerName;
-            log.ActionName = actDes?.Description ?? ctrlActDesc.ActionName + (postDes == null ? string.Empty : "[P]");
+            log.ModuleName = ctrlDes?.GetDescription(ctrl) ?? ctrlActDesc.ControllerName;
+            log.ActionName = actDes?.GetDescription(ctrl) ?? ctrlActDesc.ActionName + (postDes == null ? string.Empty : "[P]");
             log.ActionUrl = context.HttpContext.GetRemoteIpAddress();
             log.IP = context.HttpContext.Connection.RemoteIpAddress.ToString();
 
@@ -53,6 +54,8 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                 {
                     var model = item.Value as BaseVM;
                     model.Session = new SessionServiceProvider(context.HttpContext.Session);
+                    model.Cache = ctrl.Cache;
+                    model.LoginUserInfo = ctrl.LoginUserInfo;
                     model.DC = ctrl.DC;
                     model.MSD = new ModelStateServiceProvider(ctrl.ModelState);
                     model.FC = new Dictionary<string, object>();
@@ -65,6 +68,12 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                     model.DataContextCI = ((GlobalData)context.HttpContext.RequestServices.GetService(typeof(GlobalData))).DataContextCI;
                     model.Controller = ctrl;
                     model.ControllerName = ctrl.GetType().FullName;
+                    model.Localizer = ctrl.Localizer;
+                    var programtype = ctrl.GetType().Assembly.GetTypes().Where(x => x.Name == "Program").FirstOrDefault();
+                    if (programtype != null)
+                    {
+                        model.Localizer = GlobalServices.GetRequiredService(typeof(IStringLocalizer<>).MakeGenericType(programtype)) as IStringLocalizer;
+                    }
                     if (ctrl is BaseController c)
                     {
                         model.WindowIds = c.WindowIds;
@@ -232,7 +241,7 @@ namespace WalkingTec.Mvvm.Mvc.Filters
             if (context.Result is PartialViewResult)
             {
                 var model = (context.Result as PartialViewResult).ViewData.Model as BaseVM;
-                if (model == null)
+                if ((context.Result as PartialViewResult).ViewData.Model == null)
                 {
                     model = ctrl.CreateVM<BaseVM>();
                     (context.Result as PartialViewResult).ViewData.Model = model;
@@ -250,9 +259,9 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                         {
                             if (ctrlDes != null)
                             {
-                                pagetitle = ctrlDes.Description + " - ";
+                                pagetitle = ctrlDes.GetDescription(ctrl) + " - ";
                             }
-                            pagetitle += actDes.Description;
+                            pagetitle += actDes.GetDescription(ctrl);
                         }
                     }
                     else
@@ -277,7 +286,7 @@ namespace WalkingTec.Mvvm.Mvc.Filters
             if (context.Result is ViewResult)
             {
                 var model = (context.Result as ViewResult).ViewData.Model as BaseVM;
-                if (model == null)
+                if ((context.Result as ViewResult).ViewData.Model == null)
                 {
                     model = ctrl.CreateVM<BaseVM>();
                     (context.Result as ViewResult).ViewData.Model = model;
@@ -288,7 +297,12 @@ namespace WalkingTec.Mvvm.Mvc.Filters
 
         public override void OnResultExecuted(ResultExecutedContext context)
         {
-            if (!(context.Controller is IBaseController ctrl)) return;
+            var ctrl = context.Controller as IBaseController;
+            if (ctrl == null)
+            {
+                base.OnResultExecuted(context);
+                return;
+            }
             var ctrlActDesc = context.ActionDescriptor as ControllerActionDescriptor;
             //如果是来自Error，则已经记录过日志，跳过
             if (ctrlActDesc.ControllerName == "_Framework" && ctrlActDesc.ActionName == "Error")
@@ -308,8 +322,8 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                     log.ActionTime = DateTime.Now;
                     log.ITCode = ctrl.LoginUserInfo?.ITCode ?? string.Empty;
                     // 给日志的多语言属性赋值
-                    log.ModuleName = ctrlDes?.Description ?? ctrlActDesc.ControllerName;
-                    log.ActionName = actDes?.Description ?? ctrlActDesc.ActionName + (postDes == null ? string.Empty : "[P]");
+                    log.ModuleName = ctrlDes?.GetDescription(ctrl) ?? ctrlActDesc.ControllerName;
+                    log.ActionName = actDes?.GetDescription(ctrl) ?? ctrlActDesc.ActionName + (postDes == null ? string.Empty : "[P]");
                     log.ActionUrl = context.HttpContext.Request.Path;
                     log.IP = context.HttpContext.GetRemoteIpAddress();
                     log.Remark = context.Exception?.ToString() ?? string.Empty;
@@ -342,7 +356,7 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                 }
                 else
                 {
-                    context.HttpContext.Response.WriteAsync("页面发生错误");
+                    context.HttpContext.Response.WriteAsync(Program._localizer["PageError"]);
                 }
             }
             base.OnResultExecuted(context);

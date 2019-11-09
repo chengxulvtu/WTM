@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using WalkingTec.Mvvm.Core;
@@ -14,7 +15,7 @@ using WalkingTec.Mvvm.Mvc;
 
 namespace WalkingTec.Mvvm.Doc.Controllers
 {
-    [Public]
+    [AllowAnonymous]
     [ActionDescription("页面层")]
     public class UIController : BaseController
     {
@@ -91,6 +92,13 @@ namespace WalkingTec.Mvvm.Doc.Controllers
 
         [ActionDescription("Rich")]
         public IActionResult Rich()
+        {
+            var vm = CreateVM<MajorVm>();
+            return PartialView(vm);
+        }
+
+        [ActionDescription("UEditor")]
+        public IActionResult UEditor()
         {
             var vm = CreateVM<MajorVm>();
             return PartialView(vm);
