@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WalkingTec.Mvvm.Core.Auth
 {
@@ -19,19 +20,32 @@ namespace WalkingTec.Mvvm.Core.Auth
         private const Token _emptyToken = null;
 
         private readonly Configs _configs;
-        private readonly IDataContext _dc;
+        private IDataContext _dc;
         public IDataContext DC => _dc;
+
+
+        //private readonly IServiceProvider _serviceProvider;
+        private readonly Tenant _tenant;
+
 
         public TokenService(
             ILogger<TokenService> logger,
-            IOptions<JwtOptions> jwtOptions
+            IOptions<JwtOptions> jwtOptions,
+            Tenant tenant
         )
         {
             _configs = GlobalServices.GetRequiredService<Configs>();
             _jwtOptions = jwtOptions.Value;
             _logger = logger;
+            //_serviceProvider = serviceProvider;
+            _tenant = tenant;
             _dc = CreateDC();
         }
+
+
+
+
+
 
         public async Task<Token> IssueTokenAsync(LoginUserInfo loginUserInfo)
         {
@@ -75,9 +89,12 @@ namespace WalkingTec.Mvvm.Core.Auth
 
         private IDataContext CreateDC()
         {
-            string cs = "default";
+            //using (var serviceScope = _serviceProvider.CreateScope())
+            //{
+            //var tenant = _serviceProvider.GetService<Tenant>();
             var globalIngo = GlobalServices.GetRequiredService<GlobalData>();
-            return (IDataContext)globalIngo.DataContextCI?.Invoke(new object[] { _configs.ConnectionStrings?.Where(x => x.Key.ToLower() == cs).Select(x => x.Value).FirstOrDefault(), _configs.DbType });
+            return (IDataContext)globalIngo.DataContextCI?.Invoke(new object[] { _tenant.ConnectionString, _configs.DbType });
+            //}
         }
 
 

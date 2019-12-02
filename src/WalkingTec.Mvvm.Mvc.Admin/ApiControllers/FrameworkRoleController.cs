@@ -16,7 +16,7 @@ namespace WalkingTec.Mvvm.Admin.Api
     [ActionDescription("RoleManagement")]
     [ApiController]
     [Route("api/_[controller]")]
-	public class _FrameworkRoleController : BaseTenantApiController
+	public class FrameworkRoleController : BaseTenantApiController
     {
         [ActionDescription("Search")]
         [HttpPost("[action]")]

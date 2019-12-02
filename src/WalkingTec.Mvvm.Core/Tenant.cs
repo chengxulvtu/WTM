@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace WalkingTec.Mvvm.Mvc.Model
+namespace WalkingTec.Mvvm.Core
 {
     public class Tenant
     {

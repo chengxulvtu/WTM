@@ -16,7 +16,7 @@ namespace WalkingTec.Mvvm.Admin.Api
     [ActionDescription("Log")]
     [ApiController]
     [Route("api/_[controller]")]
-	public class _ActionLogController : BaseTenantApiController
+	public class ActionLogController : BaseTenantApiController
     {
         [ActionDescription("Search")]
         [HttpPost("[action]")]

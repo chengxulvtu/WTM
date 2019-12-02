@@ -16,7 +16,7 @@ namespace WalkingTec.Mvvm.Admin.Api
     [ActionDescription("GroupManagement")]
     [ApiController]
     [Route("api/_[controller]")]
-	public class _FrameworkGroupController : BaseTenantApiController
+	public class FrameworkGroupController : BaseTenantApiController
     {
         [ActionDescription("Search")]
         [HttpPost("[action]")]

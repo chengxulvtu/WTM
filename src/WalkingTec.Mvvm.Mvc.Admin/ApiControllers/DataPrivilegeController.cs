@@ -16,7 +16,7 @@ namespace WalkingTec.Mvvm.Admin.Api
     [ActionDescription("DataPrivilege")]
     [ApiController]
     [Route("api/_[controller]")]
-    public class _DataPrivilegeController : BaseTenantApiController
+    public class DataPrivilegeController : BaseTenantApiController
     {
         [ActionDescription("Search")]
         [HttpPost("[action]")]
