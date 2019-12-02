@@ -25,7 +25,7 @@ namespace WalkingTec.Mvvm.Admin.Api
     [Route("api/_[controller]")]
     [Route("api/_login")]
     [ActionDescription("Login")]
-    public class AccountController : BaseApiController
+    public class AccountController : BaseTenantApiController
     {
         private readonly ILogger _logger;
         private readonly ITokenService _authService;

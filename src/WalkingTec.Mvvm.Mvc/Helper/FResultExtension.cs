@@ -1,4 +1,5 @@
 using System;
+using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Core.Exceptions;
 
 namespace WalkingTec.Mvvm.Mvc
@@ -106,6 +107,13 @@ namespace WalkingTec.Mvvm.Mvc
         public static FResult AddCustomScript(this FResult self, string script)
         {
             self.ContentBuilder.Append(script);
+            return self;
+        }
+
+
+        public static FResult ResetForm(this FResult self, string formId)
+        {
+            self.ContentBuilder.Append($"ff.resetForm('{formId}');");
             return self;
         }
     }

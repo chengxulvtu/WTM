@@ -16,7 +16,7 @@ namespace WalkingTec.Mvvm.Admin.Api
     [ActionDescription("UserManagement")]
     [ApiController]
     [Route("api/_FrameworkUserBase")]
-    public class FrameworkUserController : BaseApiController
+    public class FrameworkUserController : BaseTenantApiController
     {
         [ActionDescription("Search")]
         [HttpPost("[action]")]

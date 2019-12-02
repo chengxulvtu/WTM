@@ -14,6 +14,8 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI
 
         public string TriggerUrl { get; set; }
 
+        public string Verify { get; set; }
+
 
         /// <summary>
         /// 改变选择时触发的js函数，func(data)格式;
@@ -31,7 +33,7 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
             string placeHolder = EmptyText ?? "";
-            string type = IsPassword ? "password":"text";
+            string type = IsPassword ? "password" : "text";
             output.TagName = "input";
             output.TagMode = TagMode.StartTagOnly;
             output.Attributes.Add("type", type);
@@ -46,6 +48,10 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI
             }
             output.Attributes.Add("placeholder", placeHolder);
             output.Attributes.Add("class", "layui-input");
+            if (!string.IsNullOrEmpty(Verify))
+            {
+                output.Attributes.Add("lay-verify", Verify);
+            }
             base.Process(context, output);
         }
     }
