@@ -355,6 +355,7 @@ namespace WalkingTec.Mvvm.Mvc
 
                             ValidateLifetime = true
                         };
+
                     });
             #endregion
 

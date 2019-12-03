@@ -39,7 +39,7 @@ namespace WalkingTec.Mvvm.Admin.Api
 
         [AllowAnonymous]
         [HttpPost("[action]")]
-        public async Task<IActionResult> Login([FromForm]string userid, [FromForm]string password, [FromForm]bool rememberLogin = false, [FromForm]bool cookie = true)
+        public async Task<IActionResult> Login([FromForm]string userid, [FromForm] string password, [FromForm]bool rememberLogin = false, [FromForm]bool cookie = true)
         {
             var user = DC.Set<FrameworkUserBase>()
                             .Include(x => x.UserRoles)
@@ -50,7 +50,11 @@ namespace WalkingTec.Mvvm.Admin.Api
             //如果没有找到则输出错误
             if (user == null)
             {
-                return BadRequest("LoadFailed");
+                return BadRequest(new
+                {
+                    result = "fail",
+                    msg = "用户名或密码错误"
+                });
             }
             var roleIDs = user.UserRoles.Select(x => x.RoleId).ToList();
             var groupIDs = user.UserGroups.Select(x => x.GroupId).ToList();

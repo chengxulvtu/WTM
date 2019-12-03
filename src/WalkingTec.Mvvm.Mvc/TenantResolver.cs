@@ -38,7 +38,7 @@ namespace WalkingTec.Mvvm.Mvc
                             ConnectionString = t.ConnectionString
                         });
                     }
-                  
+
                 }
                 return _tenants;
             }
@@ -47,7 +47,7 @@ namespace WalkingTec.Mvvm.Mvc
 
         public Tenant ResolveByHost(string host)
         {
-            return Tenants.FirstOrDefault(t => t.HostName == host);
+            return Tenants.FirstOrDefault(t => t.HostName.Split(';').Any(s => s == host));
         }
 
 
