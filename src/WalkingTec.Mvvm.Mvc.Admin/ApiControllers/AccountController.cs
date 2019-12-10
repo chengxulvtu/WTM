@@ -147,6 +147,26 @@ namespace WalkingTec.Mvvm.Admin.Api
         }
 
         [AllRights]
+        [HttpGet("[action]")]
+        public IActionResult GetUserInfo()
+        {
+            if (LoginUserInfo != null)
+            {
+                return Ok(new UserInfo
+                {
+                    UserId = LoginUserInfo.Id,
+                    UserName = LoginUserInfo.ITCode,
+                    Name = LoginUserInfo.Name
+                });
+            }
+            else
+            {
+                return StatusCode(401);
+            }
+        }
+
+
+        [AllRights]
         [HttpGet("[action]/{id}")]
         public IActionResult CheckLogin(Guid id)
         {
@@ -255,5 +275,19 @@ namespace WalkingTec.Mvvm.Admin.Api
         public string Url { get; set; }
 
         public string Icon { get; set; }
+    }
+
+
+    public class UserInfo
+    {
+        [JsonProperty("user_id")]
+        public Guid UserId { get; set; }
+
+        [JsonProperty("user_name")]
+        public string UserName { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
     }
 }
