@@ -383,19 +383,19 @@ namespace WalkingTec.Mvvm.Core
                         Set<FrameworkMenu>().Add(systemManagement);
                     }
 
-                    if(IsSpa == false)
+                    if (IsSpa == false)
                     {
                         var apifolder = GetFolderMenu("Api", new List<FrameworkRole> { adminRole }, null);
                         apifolder.ShowOnMenu = false;
                         apifolder.DisplayOrder = 100;
-                        var logList2 = GetMenu2(AllModules, "ActionLog", new List<FrameworkRole> { adminRole }, null, 1) ;
+                        var logList2 = GetMenu2(AllModules, "ActionLog", new List<FrameworkRole> { adminRole }, null, 1);
                         var userList2 = GetMenu2(AllModules, "FrameworkUser", new List<FrameworkRole> { adminRole }, null, 2);
                         var roleList2 = GetMenu2(AllModules, "FrameworkRole", new List<FrameworkRole> { adminRole }, null, 3);
                         var groupList2 = GetMenu2(AllModules, "FrameworkGroup", new List<FrameworkRole> { adminRole }, null, 4);
                         var menuList2 = GetMenu2(AllModules, "FrameworkMenu", new List<FrameworkRole> { adminRole }, null, 5);
                         var dpList2 = GetMenu2(AllModules, "DataPrivilege", new List<FrameworkRole> { adminRole }, null, 6);
-                        var apis = new FrameworkMenu[] { logList2, userList2, roleList2, groupList2, menuList2, dpList2};
-                        apis.ToList().ForEach(x => { x.ShowOnMenu = false;x.PageName += $"({Program._localizer["BuildinApi"]})"; });
+                        var apis = new FrameworkMenu[] { logList2, userList2, roleList2, groupList2, menuList2, dpList2 };
+                        apis.ToList().ForEach(x => { x.ShowOnMenu = false; x.PageName += $"({Program._localizer["BuildinApi"]})"; });
                         apifolder.Children.AddRange(apis);
                         Set<FrameworkMenu>().Add(apifolder);
                     }
@@ -405,6 +405,13 @@ namespace WalkingTec.Mvvm.Core
                 Set<FrameworkUserRole>().AddRange(userroles);
                 await SaveChangesAsync();
                 rv = false;
+            }
+            else
+            {
+                // 开发时启用迁移，新的数据库会自动生成数据库和表，如果有迁移文件，则要保证__efmigrationshistory表中有迁移记录
+                // 没有迁移记录时，则需要生成一个空的迁移
+
+                Database.Migrate();
             }
             return rv;
         }
