@@ -406,7 +406,10 @@ namespace WalkingTec.Mvvm.Mvc
                 RequestPath = new PathString("/_js"),
                 FileProvider = new EmbeddedFileProvider(
                     typeof(_CodeGenController).GetTypeInfo().Assembly,
-                    "WalkingTec.Mvvm.Mvc"),
+                    "WalkingTec.Mvvm.Mvc")
+            });
+            app.UseStaticFiles(new StaticFileOptions
+            {
                 ContentTypeProvider = new FileExtensionContentTypeProvider(new Dictionary<string, string>
                 {
                     {".apk","application/vnd.android.package-archive" }
