@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SpaServices.StaticFiles;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -405,7 +406,11 @@ namespace WalkingTec.Mvvm.Mvc
                 RequestPath = new PathString("/_js"),
                 FileProvider = new EmbeddedFileProvider(
                     typeof(_CodeGenController).GetTypeInfo().Assembly,
-                    "WalkingTec.Mvvm.Mvc")
+                    "WalkingTec.Mvvm.Mvc"),
+                ContentTypeProvider = new FileExtensionContentTypeProvider(new Dictionary<string, string>
+                {
+                    {".apk","application/vnd.android.package-archive" }
+                })
             });
             app.UseAuthentication();
 

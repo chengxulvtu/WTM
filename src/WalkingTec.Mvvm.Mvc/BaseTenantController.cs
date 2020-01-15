@@ -25,7 +25,6 @@ namespace WalkingTec.Mvvm.Mvc
             }
         }
 
-
         public override LoginUserInfo LoginUserInfo
         {
             get
@@ -61,6 +60,5 @@ namespace WalkingTec.Mvvm.Mvc
             var tenantKey = $"{TenantContext.Tenant.Id}_{key}";
             return base.ReadFromCache(tenantKey, setFunc, timeout);
         }
-
     }
 }
